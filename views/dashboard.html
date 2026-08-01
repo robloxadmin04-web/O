@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
+  <title>O Protector â€” Dashboard</title>
   <style>
     :root {
       --bg: #0a0a0a; --panel: #141414; --panel-2: #1a1a1a;
@@ -172,6 +172,7 @@
           <textarea id="inputCode" spellcheck="false" placeholder="-- paste your Lua code here&#10;local greeting = &quot;Hello, world&quot;&#10;print(greeting)"></textarea>
 
           <div class="options" id="options">
+            <label class="opt" style="grid-column:1/-1"><input type="checkbox" id="optWrap" checked /> Encrypted loader (recommended â€” works on exploit scripts)</label>
             <label class="opt"><input type="checkbox" id="optRename" checked /> Rename locals</label>
             <label class="opt"><input type="checkbox" id="optStrings" checked /> Encrypt strings</label>
             <label class="opt"><input type="checkbox" id="optNumbers" checked /> Mangle numbers</label>
@@ -306,7 +307,8 @@
           body: JSON.stringify({
             source: src,
             options: readOptions(),
-            lockKey: document.getElementById("optLock").checked
+            lockKey: document.getElementById("optLock").checked,
+            mode: document.getElementById("optWrap").checked ? "wrap" : "obfuscate"
           })
         })
           .then(function (res) {
