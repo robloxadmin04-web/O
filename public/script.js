@@ -1,9 +1,10 @@
-// Simple client-side login page logic.
-// Replace the fakeSignIn() call with a real request to your backend.
+// Login page logic: validation, SVG icon toggles, theme switch, and the
+// real request to /api/login.
 
 (function () {
   "use strict";
 
+  var root = document.documentElement;
   var form = document.getElementById("loginForm");
   var email = document.getElementById("email");
   var password = document.getElementById("password");
@@ -13,14 +14,28 @@
   var pwToggle = document.getElementById("pwToggle");
   var submitBtn = document.getElementById("submitBtn");
   var formStatus = document.getElementById("formStatus");
+  var themeToggle = document.getElementById("themeToggle");
+  var googleBtn = document.getElementById("googleBtn");
 
   var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  var STORAGE_KEY = "login.remembered.email";
+  var EMAIL_KEY = "login.remembered.email";
+  var THEME_KEY = "theme";
 
-  // Restore a remembered email on load.
+  // --- Theme ------------------------------------------------------------
+
+  themeToggle.addEventListener("click", function () {
+    var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+    root.setAttribute("data-theme", next);
+    try {
+      window.localStorage.setItem(THEME_KEY, next);
+    } catch (e) {}
+  });
+
+  // --- Remembered email -------------------------------------------------
+
   var saved = null;
   try {
-    saved = window.localStorage.getItem(STORAGE_KEY);
+    saved = window.localStorage.getItem(EMAIL_KEY);
   } catch (e) {
     saved = null;
   }
@@ -28,6 +43,8 @@
     email.value = saved;
     remember.checked = true;
   }
+
+  // --- Helpers ----------------------------------------------------------
 
   function setError(input, node, message) {
     node.textContent = message || "";
@@ -40,13 +57,8 @@
     }
   }
 
-  function setStatus(message, isError) {
+  function setStatus(message) {
     formStatus.textContent = message || "";
-    if (isError) {
-      formStatus.classList.add("error");
-    } else {
-      formStatus.classList.remove("error");
-    }
   }
 
   function validateEmail() {
@@ -64,13 +76,8 @@
   }
 
   function validatePassword() {
-    var value = password.value;
-    if (!value) {
+    if (!password.value) {
       setError(password, passwordError, "Password is required.");
-      return false;
-    }
-    if (value.length < 8) {
-      setError(password, passwordError, "Password must be at least 8 characters.");
       return false;
     }
     setError(password, passwordError, "");
@@ -88,26 +95,38 @@
     }
   }
 
-  // Stand-in for a real API call. Swap this out for fetch() against your endpoint.
-  function fakeSignIn(payload) {
-    return new Promise(function (resolve, reject) {
-      window.setTimeout(function () {
-        if (payload.password === "wrongpassword") {
-          reject(new Error("Incorrect email or password."));
-        } else {
-          resolve({ ok: true });
-        }
-      }, 1200);
+  function signIn(payload) {
+    return fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      return res
+        .json()
+        .catch(function () {
+          return {};
+        })
+        .then(function (data) {
+          if (!res.ok) {
+            throw new Error(data.error || "Sign in failed. Please try again.");
+          }
+          return data;
+        });
     });
   }
+
+  // --- Password visibility ---------------------------------------------
 
   pwToggle.addEventListener("click", function () {
     var isHidden = password.type === "password";
     password.type = isHidden ? "text" : "password";
-    pwToggle.textContent = isHidden ? "Hide" : "Show";
+    pwToggle.classList.toggle("is-visible", isHidden);
     pwToggle.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
     password.focus();
   });
+
+  // --- Field feedback ---------------------------------------------------
 
   email.addEventListener("blur", validateEmail);
   password.addEventListener("blur", validatePassword);
@@ -123,6 +142,15 @@
       validatePassword();
     }
   });
+
+  // Placeholder until an OAuth route exists on the server.
+  if (googleBtn) {
+    googleBtn.addEventListener("click", function () {
+      setStatus("Google sign-in is not configured yet.");
+    });
+  }
+
+  // --- Submit -----------------------------------------------------------
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -142,9 +170,9 @@
 
     try {
       if (remember.checked) {
-        window.localStorage.setItem(STORAGE_KEY, email.value.trim());
+        window.localStorage.setItem(EMAIL_KEY, email.value.trim());
       } else {
-        window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(EMAIL_KEY);
       }
     } catch (e) {
       // Storage can be blocked; sign-in still works without it.
@@ -152,17 +180,15 @@
 
     setLoading(true);
 
-    fakeSignIn({ email: email.value.trim(), password: password.value })
-      .then(function () {
-        setStatus("Signed in successfully. Redirecting...", false);
-        // window.location.href = "/dashboard";
+    signIn({ email: email.value.trim(), password: password.value })
+      .then(function (data) {
+        setStatus("Signed in. Redirecting...");
+        window.location.href = data.redirect || "/dashboard";
       })
       .catch(function (err) {
-        setStatus(err.message, true);
-        password.select();
-      })
-      .then(function () {
+        setStatus(err.message);
         setLoading(false);
+        password.select();
       });
   });
 })();
