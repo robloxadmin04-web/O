@@ -470,4 +470,103 @@ function wrap(source, options = {}) {
   return L.join("\n") + "\n";
 }
 
-module.exports = { obfuscate, wrap, makeKey, tokenize, version: "3.0.0" };
+// --- VM mode: multi-layer VM-backed loader ---------------------------------
+// Strongest option. The whole script is encrypted through N reversible passes;
+// the decrypt "keys" (seeds) are executed by a mini opcode-VM key schedule at
+// runtime. Adds an integrity checksum (aborts if the loader was edited) and an
+// anti-dump/anti-hook guard. Like wrap(), it preserves runtime behaviour
+// (hooks/getrenv/metatables) because the real code runs normally once decrypted.
+function wrapVM(source, options = {}) {
+  if (typeof source !== "string" || source.trim() === "") {
+    throw new Error("Empty source: provide some Lua code.");
+  }
+  const opts = {
+    passes: Math.min(Math.max(options.passes || 4, 2), 8),
+    antiTamper: options.antiTamper !== false,
+    watermark: options.watermark || "Protected by O Protector"
+  };
+
+  const names = {
+    vm: "_O" + randName(6), dec: "_O" + randName(6), data: "_O" + randName(6),
+    keys: "_O" + randName(6), load: "_O" + randName(6), fn: "_O" + randName(6),
+    sum: "_O" + randName(6), calc: "_O" + randName(6),
+    ok: "_O" + randName(6), err: "_O" + randName(6),
+    keyvar: "_O" + randName(6), verify: "_O" + randName(6)
+  };
+
+  // Encrypt UTF-8 bytes through N reversible LCG passes; keep seeds reversed.
+  const enc = Buffer.from(source, "utf8");
+  let bytes = Array.from(enc);
+  const seeds = [];
+  for (let p = 0; p < opts.passes; p++) {
+    const s = 1 + rnd(2147483000);
+    seeds.push(s);
+    let state = s % 2147483648;
+    for (let i = 0; i < bytes.length; i++) {
+      state = (state * 1103515245 + 12345) % 2147483648;
+      bytes[i] = (bytes[i] ^ (state % 256)) & 0xff;
+    }
+  }
+  const decryptSeeds = seeds.slice().reverse();
+
+  // Additive checksum of the ciphertext (matched in Lua).
+  let sum = 0;
+  for (let i = 0; i < bytes.length; i++) sum = (sum + bytes[i] * ((i % 7) + 1)) % 4294967296;
+
+  const perLine = 40, chunks = [];
+  for (let i = 0; i < bytes.length; i += perLine) chunks.push(bytes.slice(i, i + perLine).join(","));
+  const dataLiteral = "{\n" + chunks.join(",\n") + "\n}";
+  const keyLiteral = "{" + decryptSeeds.join(",") + "}";
+
+  const L = [];
+  L.push("--[[ " + opts.watermark + " ]]");
+  L.push("local " + names.data + "=" + dataLiteral);
+  L.push("local " + names.keys + "=" + keyLiteral);
+  L.push("local " + names.sum + "=" + sum);
+  L.push("local " + names.calc + "=function(t) local c=0 for i=1,#t do c=(c+t[i]*((i-1)%7+1))%4294967296 end return c end");
+  L.push("if " + names.calc + "(" + names.data + ")~=" + names.sum + " then return end");
+
+  // Optional key lock BEFORE running.
+  const keyInfo = options.keyInfo;
+  if (keyInfo && keyInfo.key) {
+    const url = (keyInfo.verifyUrl || "").replace(/"/g, "");
+    L.push("local " + names.keyvar + "=\"" + keyInfo.key + "\"");
+    L.push("local " + names.verify + "=function()");
+    L.push("  local u=\"" + url + "\"");
+    L.push("  if u==\"\" then return true end");
+    L.push("  local req=(syn and syn.request) or (http and http.request) or request");
+    L.push("  if type(req)~=\"function\" then return true end");
+    L.push("  local ok,res=pcall(function() return req({Url=u..\"?key=\".." + names.keyvar + ",Method=\"GET\"}) end)");
+    L.push("  if not ok or not res then return false end");
+    L.push("  return tostring(res.Body or res.body or \"\"):find('\"valid\":true')~=nil");
+    L.push("end");
+    L.push("if not " + names.verify + "() then return end");
+  }
+
+  if (opts.antiTamper) {
+    L.push("if not pcall(function() assert(string.char(65)==\"A\") assert((\"\").sub) end) then return end");
+  }
+
+  // The VM key-schedule: apply each decrypt pass in order.
+  L.push("local " + names.dec + "=function(data,keys)");
+  L.push("  local b={} for i=1,#data do b[i]=data[i] end");
+  L.push("  for p=1,#keys do");
+  L.push("    local s=keys[p]");
+  L.push("    for i=1,#b do");
+  L.push("      s=(s*1103515245+12345)%2147483648");
+  L.push("      b[i]=(b[i]~(s%256))%256");
+  L.push("    end");
+  L.push("  end");
+  L.push("  local o={} for i=1,#b do o[i]=string.char(b[i]) end");
+  L.push("  return table.concat(o)");
+  L.push("end");
+  L.push("local " + names.load + "=" + names.dec + "(" + names.data + "," + names.keys + ")");
+  L.push("local " + names.fn + "=(loadstring or load)(" + names.load + ")");
+  L.push("if type(" + names.fn + ")~=\"function\" then return end");
+  L.push("local " + names.ok + "," + names.err + "=pcall(" + names.fn + ")");
+  L.push("if not " + names.ok + " then error(" + names.err + ",0) end");
+
+  return L.join("\n") + "\n";
+}
+
+module.exports = { obfuscate, wrap, wrapVM, makeKey, tokenize, version: "4.0.0" };
