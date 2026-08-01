@@ -3,288 +3,397 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>O Protector â€” Dashboard</title>
+  <title>O Protector - Dashboard</title>
   <style>
     :root {
       --bg: #0a0a0a; --panel: #141414; --panel-2: #1a1a1a;
-      --border: #262626; --border-2: #333333;
+      --border: #262626; --border-2: #333333; --border-3: #444444;
       --text: #f5f5f5; --muted: #a3a3a3; --muted-2: #6b6b6b;
-      --radius: 16px; --mono: "SF Mono","JetBrains Mono","Fira Code",Consolas,monospace;
+      --radius: 16px; --radius-sm: 10px;
+      --mono: ui-monospace, "SF Mono", "JetBrains Mono", Consolas, monospace;
+      --sans: Inter, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
     * { box-sizing: border-box; }
     html, body {
-      margin: 0; min-height: 100%;
-      font-family: Inter, -apple-system, "Segoe UI", Arial, sans-serif;
-      color: var(--text);
+      margin: 0; min-height: 100%; font-family: var(--sans); color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.04), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(255,255,255,0.03), transparent 30%),
+        radial-gradient(1200px 600px at 15% -10%, rgba(255,255,255,0.05), transparent 60%),
+        radial-gradient(1000px 500px at 100% 110%, rgba(255,255,255,0.035), transparent 55%),
         linear-gradient(180deg, #060606 0%, #0d0d0d 100%);
+      -webkit-font-smoothing: antialiased;
     }
-    body { min-height: 100vh; }
-    .dashboard { width: min(1180px, calc(100% - 32px)); margin: 32px auto; display: grid; gap: 20px; }
+    .wrap { width: min(1160px, calc(100% - 28px)); margin: 26px auto; display: grid; gap: 18px; }
 
+    .icon { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-lg { width: 22px; height: 22px; }
+
+    /* Topbar */
     .topbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 16px;
-      padding: 18px 22px; border: 1px solid var(--border); border-radius: var(--radius);
-      background: rgba(20,20,20,0.7); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 16px 20px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: rgba(20,20,20,0.72); backdrop-filter: blur(12px);
     }
-    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
     .brand__logo {
-      width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px;
-      background: linear-gradient(135deg, #ffffff, #a3a3a3); color: #0a0a0a;
-      font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; border: 1px solid #444;
+      width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px;
+      background: linear-gradient(135deg, #ffffff, #9a9a9a); color: #0a0a0a; border: 1px solid #4a4a4a;
     }
-    .brand h1 { margin: 0; font-size: 1.05rem; font-weight: 700; }
-    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 0.94rem; }
-    .topbar__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .brand__logo svg { width: 24px; height: 24px; stroke: #0a0a0a; stroke-width: 2.2; fill: none; }
+    .brand h1 { margin: 0; font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 0.86rem; }
     .pill {
-      padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border-2);
-      background: #1c1c1c; color: var(--muted); font-size: 0.88rem; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 13px; border-radius: 999px; border: 1px solid var(--border-2);
+      background: #1c1c1c; color: var(--muted); font-size: 0.84rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
     }
-    .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e5e5e5; box-shadow: 0 0 0 4px rgba(229,229,229,0.12); }
+    .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e8e8e8; box-shadow: 0 0 0 4px rgba(232,232,232,0.12); }
 
-    .panel { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
-    .panel__body { padding: 24px; }
-    .eyebrow { margin: 0 0 12px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.7rem; font-weight: 700; }
-    .headline { margin: 0; font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.1; }
-    .lead { margin: 14px 0 0; max-width: 60ch; color: var(--muted); line-height: 1.7; font-size: 0.98rem; }
+    .panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+    .panel__body { padding: 22px; }
+    .eyebrow { margin: 0 0 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.68rem; font-weight: 700; }
+    .headline { margin: 0; font-size: clamp(1.5rem, 3vw, 2.1rem); line-height: 1.12; letter-spacing: -0.02em; }
+    .lead { margin: 12px 0 0; max-width: 60ch; color: var(--muted); line-height: 1.65; font-size: 0.95rem; }
 
+    /* Buttons */
     .btn {
-      appearance: none; border: 1px solid var(--border-2); border-radius: 12px; padding: 12px 18px;
-      font: inherit; font-weight: 700; cursor: pointer;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
+      appearance: none; border: 1px solid var(--border-2); border-radius: 12px; padding: 11px 16px;
+      font: inherit; font-weight: 650; cursor: pointer; display: inline-flex; align-items: center; gap: 9px;
+      transition: transform .14s ease, background .14s ease, border-color .14s ease, opacity .14s ease;
     }
     .btn:hover { transform: translateY(-1px); }
-    .btn:disabled { cursor: wait; opacity: 0.6; transform: none; }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { cursor: default; opacity: 0.55; transform: none; }
     .btn--primary { color: #0a0a0a; background: #f5f5f5; border-color: #f5f5f5; }
     .btn--primary:hover { background: #ffffff; }
     .btn--ghost { color: var(--text); background: #1c1c1c; }
-    .btn--ghost:hover { background: #232323; border-color: #444; }
-    .btn--danger { color: #f5f5f5; background: #1c1c1c; border-color: #3a1f1f; }
-    .btn--danger:hover { background: #2a1414; border-color: #5a2a2a; }
-    .hero__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+    .btn--ghost:hover { background: #242424; border-color: var(--border-3); }
+    .btn--danger { color: #f0d5d5; background: #1c1414; border-color: #3a2020; }
+    .btn--danger:hover { background: #2a1717; border-color: #5a2c2c; }
+    .btn .icon { width: 17px; height: 17px; }
 
-    .hero { display: grid; grid-template-columns: 1.45fr 0.95fr; gap: 20px; }
-    .mini-grid { display: grid; gap: 14px; }
-    .metric__label { color: var(--muted-2); font-size: 0.82rem; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
-    .metric__value { margin: 0; font-size: 1.4rem; font-weight: 800; }
-    .footer-note { color: var(--muted); font-size: 0.88rem; margin-top: 10px; line-height: 1.6; }
+    .hero { display: grid; grid-template-columns: 1.5fr 0.9fr; gap: 18px; }
+    .hero__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .mini { display: grid; gap: 14px; }
+    .stat { display: flex; align-items: flex-start; gap: 13px; }
+    .stat__ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: #1c1c1c; border: 1px solid var(--border-2); color: var(--text); }
+    .stat__ic svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .stat__label { color: var(--muted-2); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 4px; }
+    .stat__value { margin: 0; font-size: 1.05rem; font-weight: 700; }
 
-    .studio { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .studio__col { display: flex; flex-direction: column; }
-    .section-title { margin: 0 0 4px; font-size: 1.02rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .section-sub { margin: 0 0 16px; color: var(--muted); font-size: 0.88rem; }
+    /* Studio */
+    .studio { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .col { display: flex; flex-direction: column; min-width: 0; }
+    .col__head { display: flex; align-items: center; gap: 9px; margin: 0 0 3px; }
+    .col__head h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+    .col__head .icon { color: var(--muted); }
+    .col__sub { margin: 0 0 14px; color: var(--muted); font-size: 0.85rem; }
+
+    /* Dropzone */
+    .drop {
+      border: 1.5px dashed var(--border-3); border-radius: var(--radius-sm); background: #101010;
+      padding: 18px; text-align: center; cursor: pointer; transition: border-color .14s ease, background .14s ease;
+      display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .drop:hover, .drop.drag { border-color: #666; background: #151515; }
+    .drop svg { width: 26px; height: 26px; stroke: var(--muted); fill: none; stroke-width: 1.7; }
+    .drop b { font-size: 0.9rem; font-weight: 650; }
+    .drop span { color: var(--muted); font-size: 0.8rem; }
+    .drop em { color: var(--text); font-style: normal; text-decoration: underline; text-underline-offset: 2px; }
+    .drop.has-file { border-style: solid; border-color: #4a4a4a; background: #131313; }
 
     textarea {
-      width: 100%; min-height: 320px; resize: vertical; background: #0d0d0d; color: #e5e5e5;
-      border: 1px solid var(--border-2); border-radius: 12px; padding: 14px;
-      font-family: var(--mono); font-size: 0.86rem; line-height: 1.55; tab-size: 2;
+      width: 100%; min-height: 260px; resize: vertical; background: #0d0d0d; color: #e6e6e6;
+      border: 1px solid var(--border-2); border-radius: var(--radius-sm); padding: 13px;
+      font-family: var(--mono); font-size: 0.82rem; line-height: 1.55; tab-size: 2;
     }
-    textarea:focus { outline: none; border-color: #555; }
+    textarea:focus { outline: none; border-color: #5a5a5a; }
     textarea[readonly] { background: #0b0b0b; color: #cfcfcf; }
+
     .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
-    .options { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin: 14px 0 4px; }
-    .opt {
-      display: flex; align-items: center; gap: 10px; padding: 11px 13px;
-      border: 1px solid var(--border); border-radius: 10px; background: #131313;
-      cursor: pointer; font-size: 0.88rem; user-select: none;
+    .fields { display: grid; gap: 10px; margin: 14px 0 2px; }
+    .field {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 11px 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #131313;
     }
-    .opt:hover { border-color: var(--border-2); }
-    .opt input { accent-color: #f5f5f5; width: 15px; height: 15px; cursor: pointer; }
+    .field label { font-size: 0.86rem; font-weight: 600; display: flex; align-items: center; gap: 9px; cursor: pointer; }
+    .field label .icon { color: var(--muted); width: 16px; height: 16px; }
+    .field select, .field input[type="number"] {
+      background: #1c1c1c; color: #f5f5f5; border: 1px solid var(--border-2); border-radius: 8px;
+      padding: 7px 10px; font: inherit; font-size: 0.85rem;
+    }
+    .field input[type="number"] { width: 72px; text-align: center; }
+    .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
+    .chk {
+      display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 1px solid var(--border);
+      border-radius: 9px; background: #121212; cursor: pointer; font-size: 0.83rem; user-select: none;
+    }
+    .chk:hover { border-color: var(--border-2); }
+    .chk input { accent-color: #f0f0f0; width: 15px; height: 15px; cursor: pointer; flex: none; }
 
-    .status-line { margin-top: 12px; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); min-height: 1.2em; }
-    .status-line.ok { color: #d4d4d4; }
-    .status-line.err { color: #f0a0a0; }
+    .note { margin-top: 12px; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); min-height: 1.1em; line-height: 1.5; }
+    .note.ok { color: #cfe8cf; }
+    .note.err { color: #f0b3b3; }
 
     .keybox {
-      margin-top: 12px; padding: 12px 14px; border: 1px solid var(--border-2); border-radius: 10px;
-      background: #0d0d0d; font-family: var(--mono); font-size: 0.82rem; color: #d4d4d4;
-      word-break: break-all; display: none;
+      margin-top: 12px; padding: 11px 13px; border: 1px solid var(--border-2); border-radius: 9px;
+      background: #0d0d0d; font-family: var(--mono); font-size: 0.78rem; color: #d6d6d6; word-break: break-all; display: none;
     }
     .keybox.show { display: block; }
     .keybox b { color: #fff; }
 
-    .grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
-    .list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
-    .list li { padding: 13px 15px; border-radius: 12px; background: #131313; border: 1px solid var(--border); }
-    .list strong { display: block; margin-bottom: 6px; font-size: 0.94rem; }
-    .list span { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+    .flist { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+    .flist li { display: flex; gap: 11px; align-items: flex-start; }
+    .flist .fi { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: #1a1a1a; border: 1px solid var(--border); color: var(--muted); flex: none; }
+    .flist .fi svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .flist strong { display: block; font-size: 0.88rem; margin-bottom: 3px; }
+    .flist span { color: var(--muted); font-size: 0.83rem; line-height: 1.5; }
 
-    .account-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); }
-    .account-row:last-child { border-bottom: 0; padding-bottom: 0; }
-    .account-row:first-of-type { padding-top: 0; }
-    .account-label { color: var(--muted); font-size: 0.9rem; }
-    .account-value { font-weight: 700; text-align: right; word-break: break-word; }
+    .arow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .arow:last-child { border-bottom: 0; padding-bottom: 0; }
+    .arow:first-of-type { padding-top: 0; }
+    .arow .k { color: var(--muted); font-size: 0.86rem; }
+    .arow .v { font-weight: 650; text-align: right; word-break: break-word; font-size: 0.88rem; }
 
-    @media (max-width: 980px) { .hero, .grid, .studio { grid-template-columns: 1fr; } }
-    @media (max-width: 640px) {
-      .dashboard { width: min(100% - 20px, 1180px); margin: 20px auto; }
-      .topbar, .panel__body { padding: 18px; }
-      .topbar { flex-direction: column; align-items: flex-start; }
-      .topbar__actions, .hero__actions { width: 100%; }
-      .options { grid-template-columns: 1fr; }
+    @media (max-width: 900px) {
+      .hero, .grid3, .studio { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: calc(100% - 20px); margin: 16px auto; gap: 14px; }
+      .panel__body { padding: 17px; }
+      .topbar { flex-direction: column; align-items: stretch; gap: 12px; }
+      .topbar .pill { align-self: flex-start; }
+      .hero__actions .btn { flex: 1 1 100%; justify-content: center; }
+      .checks { grid-template-columns: 1fr; }
+      .toolbar .btn { flex: 1 1 100%; justify-content: center; }
+      .field { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
-  <main class="dashboard">
+  <div class="wrap">
+    <!-- Topbar -->
     <header class="topbar">
       <div class="brand">
-        <div class="brand__logo" aria-hidden="true">O</div>
-        <div><h1>O Protector</h1><p>Server-side Lua obfuscation</p></div>
+        <div class="brand__logo">
+          <svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg>
+        </div>
+        <div>
+          <h1>O Protector</h1>
+          <p>Server-side Lua protection</p>
+        </div>
       </div>
-      <div class="topbar__actions"><div class="pill">Session Active</div></div>
+      <div class="pill">Session Active</div>
     </header>
 
+    <!-- Hero -->
     <section class="hero">
       <article class="panel">
         <div class="panel__body">
           <p class="eyebrow">Overview</p>
-          <h2 class="headline">Protect your Lua on the server.</h2>
+          <h2 class="headline">Protect your Lua scripts.</h2>
           <p class="lead" id="who">Loading your account...</p>
           <div class="hero__actions">
-            <button type="button" class="btn btn--primary" id="jumpBtn">Start Obfuscation</button>
-            <button type="button" class="btn btn--ghost" id="settingsBtn">Toggle Options</button>
-            <button type="button" class="btn btn--danger" id="logoutBtn">Sign out</button>
+            <button type="button" class="btn btn--primary" id="jumpBtn">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              Start protecting
+            </button>
+            <button type="button" class="btn btn--ghost" id="settingsBtn">
+              <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 2h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12a7 7 0 0 0 .1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 22h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6A7 7 0 0 0 19 12z"/></svg>
+              Options
+            </button>
+            <button type="button" class="btn btn--danger" id="logoutBtn">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sign out
+            </button>
           </div>
         </div>
       </article>
-      <aside class="mini-grid">
-        <section class="panel"><div class="panel__body">
-          <p class="metric__label">Project</p><p class="metric__value">O Protector</p>
-          <p class="footer-note">Engine runs on the server â€” never exposed to clients.</p>
+
+      <aside class="mini">
+        <section class="panel"><div class="panel__body stat">
+          <div class="stat__ic"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+          <div><p class="stat__label">Mode</p><p class="stat__value" id="statMode">VM loader</p></div>
         </div></section>
-        <section class="panel"><div class="panel__body">
-          <p class="metric__label">Mode</p><p class="metric__value">Server-side</p>
-          <p class="footer-note">Rename Â· encrypt Â· mangle Â· guard Â· key-lock.</p>
+        <section class="panel"><div class="panel__body stat">
+          <div class="stat__ic"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg></div>
+          <div><p class="stat__label">Engine</p><p class="stat__value">Ready</p></div>
         </div></section>
       </aside>
     </section>
 
+    <!-- Studio -->
     <section class="panel" id="studio"><div class="panel__body">
       <div class="studio">
-        <div class="studio__col">
-          <h3 class="section-title">Input Script</h3>
-          <p class="section-sub">Paste your Lua source. It is protected on the server.</p>
-          <textarea id="inputCode" spellcheck="false" placeholder="-- paste your Lua code here&#10;local greeting = &quot;Hello, world&quot;&#10;print(greeting)"></textarea>
+        <!-- Input -->
+        <div class="col">
+          <div class="col__head">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            <h3>Input script</h3>
+          </div>
+          <p class="col__sub">Upload a .lua or .txt file, or paste your code below.</p>
 
-          <div class="options" id="options">
-            <label class="opt" style="grid-column:1/-1">Protection mode
-              <select id="optMode" style="margin-left:auto;background:#1c1c1c;color:#f5f5f5;border:1px solid #333;border-radius:8px;padding:6px 10px;font:inherit">
-                <option value="vm" selected>VM loader â€” strongest (recommended)</option>
+          <div class="drop" id="drop">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v13"/></svg>
+            <b id="dropTitle">Drop a file here</b>
+            <span>or <em>browse</em> - .lua and .txt supported</span>
+            <input type="file" id="fileInput" accept=".lua,.txt,text/plain" hidden />
+          </div>
+
+          <textarea id="input" spellcheck="false" placeholder="-- paste your Lua code here&#10;local greeting = &quot;Hello world&quot;&#10;print(greeting)"></textarea>
+
+          <div class="fields">
+            <div class="field">
+              <label><svg class="icon" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg>Protection mode</label>
+              <select id="mode">
+                <option value="vm" selected>VM loader (strongest)</option>
                 <option value="wrap">Encrypted loader</option>
-                <option value="obfuscate">Source-level obfuscation</option>
+                <option value="obfuscate">Source obfuscation</option>
               </select>
-            </label>
-            <label class="opt" style="grid-column:1/-1">Encryption passes (VM mode)
-              <input id="optPasses" type="number" min="2" max="8" value="5" style="margin-left:auto;width:70px;background:#1c1c1c;color:#f5f5f5;border:1px solid #333;border-radius:8px;padding:6px 10px;font:inherit" />
-            </label>
-            <label class="opt"><input type="checkbox" id="optRename" checked /> Rename locals</label>
-            <label class="opt"><input type="checkbox" id="optStrings" checked /> Encrypt strings</label>
-            <label class="opt"><input type="checkbox" id="optNumbers" checked /> Mangle numbers</label>
-            <label class="opt"><input type="checkbox" id="optJunk" checked /> Inject junk code</label>
-            <label class="opt"><input type="checkbox" id="optTamper" checked /> Anti-tamper guard</label>
-            <label class="opt"><input type="checkbox" id="optMinify" checked /> Minify output</label>
-            <label class="opt"><input type="checkbox" id="optLock" /> Lock with runtime key</label>
-            <label class="opt"><input type="checkbox" id="optWatermark" checked /> Watermark header</label>
+            </div>
+            <div class="field">
+              <label><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16"/></svg>Encryption passes</label>
+              <input type="number" id="passes" min="2" max="8" value="5" />
+            </div>
+          </div>
+
+          <div class="checks">
+            <label class="chk"><input type="checkbox" id="cTamper" checked /> Anti-tamper guard</label>
+            <label class="chk"><input type="checkbox" id="cLock" /> Runtime key lock</label>
+            <label class="chk"><input type="checkbox" id="cWatermark" checked /> Watermark header</label>
+            <label class="chk"><input type="checkbox" id="cRename" checked /> Rename locals</label>
           </div>
 
           <div class="toolbar">
-            <button type="button" class="btn btn--primary" id="runBtn">Obfuscate</button>
-            <button type="button" class="btn btn--ghost" id="clearBtn">Clear</button>
+            <button type="button" class="btn btn--primary" id="runBtn">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+              Protect
+            </button>
             <button type="button" class="btn btn--ghost" id="sampleBtn">Load sample</button>
+            <button type="button" class="btn btn--ghost" id="clearBtn">Clear</button>
           </div>
-          <div class="status-line" id="status"></div>
+          <p class="note" id="note"></p>
         </div>
 
-        <div class="studio__col">
-          <h3 class="section-title">Protected Output</h3>
-          <p class="section-sub">Copy or download the result.</p>
-          <textarea id="outputCode" spellcheck="false" readonly placeholder="-- your protected script appears here"></textarea>
+        <!-- Output -->
+        <div class="col">
+          <div class="col__head">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+            <h3>Protected output</h3>
+          </div>
+          <p class="col__sub">Copy the result or download it as a .lua file.</p>
+          <textarea id="output" spellcheck="false" readonly placeholder="-- your protected script appears here"></textarea>
           <div class="keybox" id="keybox"><b>Runtime key:</b> <span id="keyval"></span></div>
           <div class="toolbar">
-            <button type="button" class="btn btn--ghost" id="copyBtn">Copy</button>
-            <button type="button" class="btn btn--ghost" id="downloadBtn">Download .lua</button>
+            <button type="button" class="btn btn--ghost" id="copyBtn">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+            <button type="button" class="btn btn--ghost" id="dlBtn">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+              Download
+            </button>
           </div>
-          <div class="status-line" id="outStatus"></div>
+          <p class="note" id="outNote"></p>
         </div>
       </div>
     </div></section>
 
-    <section class="grid">
+    <!-- Info -->
+    <section class="grid3">
       <article class="panel"><div class="panel__body">
-        <h3 class="section-title">How it works</h3>
-        <ul class="list">
-          <li><strong>Server engine</strong><span>Obfuscation runs on the backend; clients never see it.</span></li>
-          <li><strong>Encrypted strings</strong><span>Literals become rotating-key byte arrays.</span></li>
-          <li><strong>Runtime key lock</strong><span>Optional per-build key checked against the server before running.</span></li>
+        <div class="col__head"><svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg><h3>How it works</h3></div>
+        <ul class="flist" style="margin-top:14px">
+          <li><span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><div><strong>Server engine</strong><span>Protection runs on the backend. Clients never see the engine.</span></div></li>
+          <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></span><div><strong>Multi-pass encryption</strong><span>Your script is encrypted through several layered passes.</span></div></li>
+          <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7z"/></svg></span><div><strong>Integrity check</strong><span>Editing the loader aborts it, and anti-hook guards run first.</span></div></li>
         </ul>
       </div></article>
 
       <article class="panel"><div class="panel__body">
-        <h3 class="section-title">Account</h3>
-        <div class="account-row"><span class="account-label">Signed in as</span><span class="account-value" id="accountEmail">Loading...</span></div>
-        <div class="account-row"><span class="account-label">Access</span><span class="account-value">Private Session</span></div>
-        <div class="account-row"><span class="account-label">Workspace</span><span class="account-value">Monochrome v2</span></div>
+        <div class="col__head"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg><h3>Account</h3></div>
+        <div style="margin-top:14px">
+          <div class="arow"><span class="k">Signed in as</span><span class="v" id="acc">Loading...</span></div>
+          <div class="arow"><span class="k">Access</span><span class="v">Private session</span></div>
+          <div class="arow"><span class="k">Workspace</span><span class="v">Monochrome v3</span></div>
+        </div>
       </div></article>
 
       <article class="panel"><div class="panel__body">
-        <h3 class="section-title">Recent Activity</h3>
-        <ul class="list" id="activity">
-          <li><strong>Dashboard initialized</strong><span>The obfuscation studio loaded successfully.</span></li>
-          <li><strong>Server engine ready</strong><span>Protection runs through the backend endpoint.</span></li>
-          <li><strong>Awaiting input</strong><span>Paste a script and run your first pass.</span></li>
+        <div class="col__head"><svg class="icon icon-lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h3>Recent activity</h3></div>
+        <ul class="flist" id="activity" style="margin-top:14px">
+          <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div><strong>Dashboard ready</strong><span>The protection studio loaded successfully.</span></div></li>
+          <li><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></span><div><strong>Waiting for input</strong><span>Upload or paste a script to begin.</span></div></li>
         </ul>
       </div></article>
     </section>
-  </main>
+  </div>
 
   <script>
     (function () {
       "use strict";
-      var who = document.getElementById("who");
-      var accountEmail = document.getElementById("accountEmail");
-      var logoutBtn = document.getElementById("logoutBtn");
-      var activity = document.getElementById("activity");
+      var $ = function (id) { return document.getElementById(id); };
 
+      // Session
       fetch("/api/me", { credentials: "same-origin" })
-        .then(function (res) { if (!res.ok) throw new Error("no session"); return res.json(); })
-        .then(function (data) {
-          var email = (data && data.email) ? data.email : "Unknown user";
-          who.textContent = "Signed in as " + email + ". Your studio is ready.";
-          accountEmail.textContent = email;
+        .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function (d) {
+          var e = (d && d.email) ? d.email : "Unknown user";
+          $("who").textContent = "Signed in as " + e + ". Your studio is ready.";
+          $("acc").textContent = e;
         })
         .catch(function () { window.location.href = "/"; });
 
-      logoutBtn.addEventListener("click", function () {
-        logoutBtn.disabled = true; logoutBtn.textContent = "Signing out...";
+      $("logoutBtn").addEventListener("click", function () {
+        var b = $("logoutBtn"); b.disabled = true;
         fetch("/api/logout", { method: "POST", credentials: "same-origin" })
           .then(function () { window.location.href = "/"; });
       });
 
-      var inputCode = document.getElementById("inputCode");
-      var outputCode = document.getElementById("outputCode");
-      var statusEl = document.getElementById("status");
-      var outStatus = document.getElementById("outStatus");
-      var keybox = document.getElementById("keybox");
-      var keyval = document.getElementById("keyval");
-      var runBtn = document.getElementById("runBtn");
+      var input = $("input"), output = $("output"), note = $("note"), outNote = $("outNote");
+      var keybox = $("keybox"), keyval = $("keyval");
 
-      function setStatus(el, msg, kind) { el.textContent = msg; el.className = "status-line" + (kind ? " " + kind : ""); }
+      function setNote(el, msg, kind) { el.textContent = msg || ""; el.className = "note" + (kind ? " " + kind : ""); }
+      function setMode() { var m = $("mode").value; $("statMode").textContent = m === "vm" ? "VM loader" : m === "wrap" ? "Encrypted loader" : "Source obfuscation"; }
+      $("mode").addEventListener("change", setMode);
 
-      function readOptions() {
+      // File upload + drag/drop
+      var drop = $("drop"), fileInput = $("fileInput"), dropTitle = $("dropTitle");
+      function acceptFile(file) {
+        if (!file) return;
+        var okType = /\.(lua|txt)$/i.test(file.name) || file.type === "text/plain";
+        if (!okType) { setNote(note, "Please choose a .lua or .txt file.", "err"); return; }
+        if (file.size > 3 * 1024 * 1024) { setNote(note, "File too large (3MB max).", "err"); return; }
+        var reader = new FileReader();
+        reader.onload = function () {
+          input.value = String(reader.result || "");
+          drop.classList.add("has-file");
+          dropTitle.textContent = file.name + " loaded";
+          setNote(note, "Loaded " + file.name + " (" + input.value.length + " chars). Ready to protect.", "ok");
+        };
+        reader.onerror = function () { setNote(note, "Could not read that file.", "err"); };
+        reader.readAsText(file);
+      }
+      drop.addEventListener("click", function () { fileInput.click(); });
+      fileInput.addEventListener("change", function () { acceptFile(fileInput.files && fileInput.files[0]); });
+      ["dragenter", "dragover"].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("drag"); });
+      });
+      ["dragleave", "drop"].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("drag"); });
+      });
+      drop.addEventListener("drop", function (e) {
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        acceptFile(f);
+      });
+
+      function options() {
         return {
-          renameLocals: document.getElementById("optRename").checked,
-          encodeStrings: document.getElementById("optStrings").checked,
-          mangleNumbers: document.getElementById("optNumbers").checked,
-          injectJunk: document.getElementById("optJunk").checked,
-          antiTamper: document.getElementById("optTamper").checked,
-          minify: document.getElementById("optMinify").checked,
-          watermark: document.getElementById("optWatermark").checked ? "Protected by O Protector" : "",
-          passes: parseInt(document.getElementById("optPasses").value, 10) || 5
+          renameLocals: $("cRename").checked,
+          antiTamper: $("cTamper").checked,
+          passes: parseInt($("passes").value, 10) || 5,
+          watermark: $("cWatermark").checked ? "Protected by O Protector" : ""
         };
       }
 
@@ -303,91 +412,75 @@
         'print("Total characters: " .. total)'
       ].join("\n");
 
-      runBtn.addEventListener("click", function () {
-        var src = inputCode.value;
-        if (!src.trim()) { setStatus(statusEl, "Paste some Lua code first.", "err"); return; }
-        runBtn.disabled = true;
-        setStatus(statusEl, "Obfuscating on server...", "");
+      $("runBtn").addEventListener("click", function () {
+        var src = input.value;
+        if (!src.trim()) { setNote(note, "Add a script first - upload a file or paste code.", "err"); return; }
+        var btn = $("runBtn"); btn.disabled = true;
+        setNote(note, "Protecting on server...", "");
         keybox.className = "keybox";
 
         fetch("/api/obfuscate", {
-          method: "POST",
-          credentials: "same-origin",
+          method: "POST", credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            source: src,
-            options: readOptions(),
-            lockKey: document.getElementById("optLock").checked,
-            mode: document.getElementById("optMode").value
-          })
+          body: JSON.stringify({ source: src, options: options(), lockKey: $("cLock").checked, mode: $("mode").value })
         })
-          .then(function (res) {
-            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+          .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+          .then(function (x) {
+            if (!x.ok) throw new Error((x.d && x.d.error) || "Request failed.");
+            output.value = x.d.output;
+            var ratio = src.length ? Math.round((x.d.chars / src.length) * 100) : 0;
+            setNote(note, "Done. " + src.length + " to " + x.d.chars + " chars (" + ratio + "%).", "ok");
+            if (x.d.key) {
+              keyval.textContent = x.d.key; keybox.className = "keybox show";
+              setNote(outNote, "Key-locked build. Keep this key safe.", "ok");
+            } else { setNote(outNote, "Ready to copy or download.", "ok"); }
+            addActivity("Protection complete", x.d.chars + " characters produced" + (x.d.key ? " (key-locked)." : "."));
           })
-          .then(function (r) {
-            if (!r.ok) { throw new Error((r.data && r.data.error) || "Request failed."); }
-            outputCode.value = r.data.output;
-            var ratio = src.length ? Math.round((r.data.chars / src.length) * 100) : 0;
-            setStatus(statusEl, "Done â€” " + src.length + " -> " + r.data.chars + " chars (" + ratio + "%).", "ok");
-            if (r.data.key) {
-              keyval.textContent = r.data.key;
-              keybox.className = "keybox show";
-              setStatus(outStatus, "Key-locked build. Keep this key â€” the script checks it at runtime.", "ok");
-            } else {
-              setStatus(outStatus, "Ready to copy or download.", "ok");
-            }
-            pushActivity("Obfuscation complete", r.data.chars + " characters produced" + (r.data.key ? " (key-locked)." : "."));
-          })
-          .catch(function (e) { setStatus(statusEl, "Error: " + e.message, "err"); })
-          .then(function () { runBtn.disabled = false; });
+          .catch(function (e) { setNote(note, "Error: " + e.message, "err"); })
+          .then(function () { btn.disabled = false; });
       });
 
-      document.getElementById("clearBtn").addEventListener("click", function () {
-        inputCode.value = ""; outputCode.value = "";
-        keybox.className = "keybox";
-        setStatus(statusEl, "Cleared.", ""); setStatus(outStatus, "", "");
-        inputCode.focus();
+      $("sampleBtn").addEventListener("click", function () {
+        input.value = SAMPLE; drop.classList.remove("has-file"); dropTitle.textContent = "Drop a file here";
+        setNote(note, "Sample loaded. Hit Protect.", "");
       });
-
-      document.getElementById("sampleBtn").addEventListener("click", function () {
-        inputCode.value = SAMPLE; setStatus(statusEl, "Sample loaded â€” hit Obfuscate.", ""); inputCode.focus();
+      $("clearBtn").addEventListener("click", function () {
+        input.value = ""; output.value = ""; keybox.className = "keybox";
+        drop.classList.remove("has-file"); dropTitle.textContent = "Drop a file here";
+        setNote(note, "Cleared.", ""); setNote(outNote, "", "");
       });
-
-      document.getElementById("copyBtn").addEventListener("click", function () {
-        if (!outputCode.value) { setStatus(outStatus, "Nothing to copy yet.", "err"); return; }
-        outputCode.select();
-        var done = function () { setStatus(outStatus, "Copied to clipboard.", "ok"); };
+      $("copyBtn").addEventListener("click", function () {
+        if (!output.value) { setNote(outNote, "Nothing to copy yet.", "err"); return; }
+        output.select();
+        var ok = function () { setNote(outNote, "Copied to clipboard.", "ok"); };
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(outputCode.value).then(done, function () { document.execCommand("copy"); done(); });
-        } else { document.execCommand("copy"); done(); }
+          navigator.clipboard.writeText(output.value).then(ok, function () { document.execCommand("copy"); ok(); });
+        } else { document.execCommand("copy"); ok(); }
       });
+      $("dlBtn").addEventListener("click", function () {
+        if (!output.value) { setNote(outNote, "Nothing to download yet.", "err"); return; }
+        var blob = new Blob([output.value], { type: "text/plain" });
+        var url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = "protected.lua"; document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+        setNote(outNote, "Downloaded protected.lua", "ok");
+      });
+      $("jumpBtn").addEventListener("click", function () { $("studio").scrollIntoView({ behavior: "smooth", block: "start" }); input.focus(); });
+      $("settingsBtn").addEventListener("click", function () { $("mode").scrollIntoView({ behavior: "smooth", block: "center" }); });
 
-      document.getElementById("downloadBtn").addEventListener("click", function () {
-        if (!outputCode.value) { setStatus(outStatus, "Nothing to download yet.", "err"); return; }
-        var blob = new Blob([outputCode.value], { type: "text/plain" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url; a.download = "protected.lua";
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        setStatus(outStatus, "Downloaded protected.lua", "ok");
-      });
-
-      document.getElementById("jumpBtn").addEventListener("click", function () {
-        document.getElementById("studio").scrollIntoView({ behavior: "smooth", block: "start" });
-        inputCode.focus();
-      });
-      document.getElementById("settingsBtn").addEventListener("click", function () {
-        document.getElementById("options").scrollIntoView({ behavior: "smooth", block: "center" });
-      });
-
-      function pushActivity(title, detail) {
+      function addActivity(title, detail) {
+        var ul = $("activity");
         var li = document.createElement("li");
+        li.innerHTML = '<span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>';
+        var div = document.createElement("div");
         var s = document.createElement("strong"); s.textContent = title;
         var sp = document.createElement("span"); sp.textContent = detail;
-        li.appendChild(s); li.appendChild(sp);
-        activity.insertBefore(li, activity.firstChild);
-        while (activity.children.length > 5) activity.removeChild(activity.lastChild);
+        div.appendChild(s); div.appendChild(sp); li.appendChild(div);
+        ul.insertBefore(li, ul.firstChild);
+        while (ul.children.length > 5) ul.removeChild(ul.lastChild);
       }
+
+      setMode();
     })();
   </script>
 </body>
