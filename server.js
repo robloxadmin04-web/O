@@ -3,7 +3,7 @@
 // O Protector backend: login/session auth + SERVER-SIDE Lua obfuscation.
 // The obfuscation engine runs only here, so the browser never sees it. Each
 // build can be locked to a per-script key that is validated at runtime through
-// /api/verify â€” the closest realistic step toward a Luarmor-style model.
+// /api/verify - the closest realistic step toward a Luarmor-style model.
 
 const crypto = require("crypto");
 const path = require("path");
@@ -159,7 +159,7 @@ function issueKey(email) {
 
 // --- Middleware ---------------------------------------------------------
 
-app.use(express.json({ limit: "256kb" })); // larger: obfuscation payloads
+app.use(express.json({ limit: "10mb" })); // larger: obfuscation payloads
 app.use(express.static(path.join(__dirname, "public")));
 
 // --- Auth routes --------------------------------------------------------
