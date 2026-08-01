@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      <header class="card__head">
+        <div class="logo" aria-hidden="true">O</div>
+        <h1>You are signed in</h1>
+        <p class="sub" id="who">Loading your account...</p>
+      </header>
+
+      <button type="button" class="btn" id="logoutBtn">Sign out</button>
+
+      <footer class="card__foot">
+        <p>This page is only reachable with a valid session cookie.</p>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var who = document.getElementById("who");
+      var logoutBtn = document.getElementById("logoutBtn");
+
+      fetch("/api/me", { credentials: "same-origin" })
+        .then(function (res) {
+          if (!res.ok) {
+            throw new Error("no session");
+          }
+          return res.json();
+        })
+        .then(function (data) {
+          who.textContent = "Signed in as " + data.email;
+        })
+        .catch(function () {
+          window.location.href = "/";
+        });
+
+      logoutBtn.addEventListener("click", function () {
+        logoutBtn.disabled = true;
+        fetch("/api/logout", { method: "POST", credentials: "same-origin" })
+          .then(function () {
+            window.location.href = "/";
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
