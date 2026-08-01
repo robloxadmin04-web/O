@@ -210,7 +210,7 @@ app.get("/api/me", requireAuth, function (req, res) {
 });
 
 // --- Obfuscation route (protected) --------------------------------------
-// Body: { source: string, options?: {...}, lockKey?: boolean }
+// Body: { source, options?, lockKey?, mode? }  mode = "wrap" | "obfuscate"
 // Returns: { ok, output, key?, chars }
 
 app.post("/api/obfuscate", requireAuth, function (req, res) {
@@ -218,11 +218,12 @@ app.post("/api/obfuscate", requireAuth, function (req, res) {
   if (!source.trim()) {
     return res.status(400).json({ error: "Provide some Lua source to protect." });
   }
-  if (source.length > 200000) {
-    return res.status(413).json({ error: "Script too large (200KB max)." });
+  if (source.length > 2000000) {
+    return res.status(413).json({ error: "Script too large (2MB max)." });
   }
 
   const raw = (req.body && req.body.options) || {};
+  const mode = (req.body && req.body.mode) === "wrap" ? "wrap" : "obfuscate";
   const options = {
     renameLocals: raw.renameLocals !== false,
     encodeStrings: raw.encodeStrings !== false,
@@ -243,7 +244,11 @@ app.post("/api/obfuscate", requireAuth, function (req, res) {
   }
 
   try {
-    const output = engine.obfuscate(source, options);
+    // "wrap" = encrypted-loader protection (works on complex exploit scripts).
+    // "obfuscate" = source-level rename/encrypt/mangle (readable structure gone).
+    const output = mode === "wrap"
+      ? engine.wrap(source, options)
+      : engine.obfuscate(source, options);
     res.json({ ok: true, output: output, key: key, chars: output.length });
   } catch (err) {
     res.status(500).json({ error: "Obfuscation failed: " + err.message });
