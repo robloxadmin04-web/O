@@ -172,7 +172,16 @@
           <textarea id="inputCode" spellcheck="false" placeholder="-- paste your Lua code here&#10;local greeting = &quot;Hello, world&quot;&#10;print(greeting)"></textarea>
 
           <div class="options" id="options">
-            <label class="opt" style="grid-column:1/-1"><input type="checkbox" id="optWrap" checked /> Encrypted loader (recommended â€” works on exploit scripts)</label>
+            <label class="opt" style="grid-column:1/-1">Protection mode
+              <select id="optMode" style="margin-left:auto;background:#1c1c1c;color:#f5f5f5;border:1px solid #333;border-radius:8px;padding:6px 10px;font:inherit">
+                <option value="vm" selected>VM loader â€” strongest (recommended)</option>
+                <option value="wrap">Encrypted loader</option>
+                <option value="obfuscate">Source-level obfuscation</option>
+              </select>
+            </label>
+            <label class="opt" style="grid-column:1/-1">Encryption passes (VM mode)
+              <input id="optPasses" type="number" min="2" max="8" value="5" style="margin-left:auto;width:70px;background:#1c1c1c;color:#f5f5f5;border:1px solid #333;border-radius:8px;padding:6px 10px;font:inherit" />
+            </label>
             <label class="opt"><input type="checkbox" id="optRename" checked /> Rename locals</label>
             <label class="opt"><input type="checkbox" id="optStrings" checked /> Encrypt strings</label>
             <label class="opt"><input type="checkbox" id="optNumbers" checked /> Mangle numbers</label>
@@ -274,7 +283,8 @@
           injectJunk: document.getElementById("optJunk").checked,
           antiTamper: document.getElementById("optTamper").checked,
           minify: document.getElementById("optMinify").checked,
-          watermark: document.getElementById("optWatermark").checked ? "Protected by O Protector" : ""
+          watermark: document.getElementById("optWatermark").checked ? "Protected by O Protector" : "",
+          passes: parseInt(document.getElementById("optPasses").value, 10) || 5
         };
       }
 
@@ -308,7 +318,7 @@
             source: src,
             options: readOptions(),
             lockKey: document.getElementById("optLock").checked,
-            mode: document.getElementById("optWrap").checked ? "wrap" : "obfuscate"
+            mode: document.getElementById("optMode").value
           })
         })
           .then(function (res) {
