@@ -1,11 +1,14 @@
 "use strict";
 
-// Minimal login backend: serves the static page from /public and exposes a
-// real /api/login endpoint that issues a signed, httpOnly session cookie.
+// O Protector backend: login/session auth + SERVER-SIDE Lua obfuscation.
+// The obfuscation engine runs only here, so the browser never sees it. Each
+// build can be locked to a per-script key that is validated at runtime through
+// /api/verify â€” the closest realistic step toward a Luarmor-style model.
 
 const crypto = require("crypto");
 const path = require("path");
 const express = require("express");
+const engine = require("./obfuscator-engine");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,9 +37,12 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
 const MAX_ATTEMPTS = 8;
 const ATTEMPT_WINDOW_MS = 1000 * 60 * 10; // 10 minutes
 
+// Public base URL used inside key-locked scripts to call back to /api/verify.
+// Set PUBLIC_URL in Render (e.g. https://your-app.onrender.com). When empty,
+// key locking still issues a key but the runtime check is skipped (fails open).
+const PUBLIC_URL = (process.env.PUBLIC_URL || "").replace(/\/+$/, "");
+
 // --- Password handling --------------------------------------------------
-// The configured password is hashed once at boot; the plain value is never
-// compared directly and never written anywhere.
 
 const PASSWORD_SALT = crypto.randomBytes(16);
 const PASSWORD_HASH = crypto.scryptSync(USER_PASSWORD, PASSWORD_SALT, 64);
@@ -66,7 +72,6 @@ function readSessionToken(token) {
   if (!token || token.indexOf(".") === -1) {
     return null;
   }
-
   const parts = token.split(".");
   const payload = parts[0];
   const signature = parts[1];
@@ -78,7 +83,6 @@ function readSessionToken(token) {
   if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
     return null;
   }
-
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
     if (!data.exp || data.exp < Date.now()) {
@@ -129,12 +133,10 @@ const attempts = new Map();
 function tooManyAttempts(ip) {
   const now = Date.now();
   const record = attempts.get(ip);
-
   if (!record || now - record.first > ATTEMPT_WINDOW_MS) {
     attempts.set(ip, { count: 1, first: now });
     return false;
   }
-
   record.count += 1;
   return record.count > MAX_ATTEMPTS;
 }
@@ -143,12 +145,24 @@ function clearAttempts(ip) {
   attempts.delete(ip);
 }
 
+// --- Key store (in memory, per instance) --------------------------------
+// Maps issued key -> { email, created }. Cleared on restart. For durable keys,
+// swap this for a database or a signed-key scheme.
+
+const issuedKeys = new Map();
+
+function issueKey(email) {
+  const key = engine.makeKey();
+  issuedKeys.set(key, { email: email, created: Date.now() });
+  return key;
+}
+
 // --- Middleware ---------------------------------------------------------
 
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json({ limit: "256kb" })); // larger: obfuscation payloads
 app.use(express.static(path.join(__dirname, "public")));
 
-// --- Routes -------------------------------------------------------------
+// --- Auth routes --------------------------------------------------------
 
 app.post("/api/login", function (req, res) {
   const ip = req.ip || "unknown";
@@ -169,7 +183,6 @@ app.post("/api/login", function (req, res) {
   const emailOk = email === USER_EMAIL;
   const passwordOk = passwordMatches(password);
 
-  // One generic message so the response never reveals which field was wrong.
   if (!emailOk || !passwordOk) {
     return res.status(401).json({ error: "Incorrect email or password." });
   }
@@ -195,6 +208,59 @@ app.post("/api/logout", function (req, res) {
 app.get("/api/me", requireAuth, function (req, res) {
   res.json({ email: req.session.email });
 });
+
+// --- Obfuscation route (protected) --------------------------------------
+// Body: { source: string, options?: {...}, lockKey?: boolean }
+// Returns: { ok, output, key?, chars }
+
+app.post("/api/obfuscate", requireAuth, function (req, res) {
+  const source = String((req.body && req.body.source) || "");
+  if (!source.trim()) {
+    return res.status(400).json({ error: "Provide some Lua source to protect." });
+  }
+  if (source.length > 200000) {
+    return res.status(413).json({ error: "Script too large (200KB max)." });
+  }
+
+  const raw = (req.body && req.body.options) || {};
+  const options = {
+    renameLocals: raw.renameLocals !== false,
+    encodeStrings: raw.encodeStrings !== false,
+    mangleNumbers: raw.mangleNumbers !== false,
+    injectJunk: raw.injectJunk !== false,
+    antiTamper: raw.antiTamper !== false,
+    minify: raw.minify !== false,
+    watermark: typeof raw.watermark === "string" ? raw.watermark : "Protected by O Protector"
+  };
+
+  let key = null;
+  if (req.body && req.body.lockKey) {
+    key = issueKey(req.session.email);
+    options.keyInfo = {
+      key: key,
+      verifyUrl: PUBLIC_URL ? PUBLIC_URL + "/api/verify" : ""
+    };
+  }
+
+  try {
+    const output = engine.obfuscate(source, options);
+    res.json({ ok: true, output: output, key: key, chars: output.length });
+  } catch (err) {
+    res.status(500).json({ error: "Obfuscation failed: " + err.message });
+  }
+});
+
+// --- Key validation callback (public) -----------------------------------
+// Called by key-locked scripts at runtime. Returns { valid: true|false }.
+// Public on purpose: the running script has no session cookie.
+
+app.get("/api/verify", function (req, res) {
+  const key = String(req.query.key || "");
+  const valid = issuedKeys.has(key);
+  res.json({ valid: valid });
+});
+
+// --- Pages --------------------------------------------------------------
 
 app.get("/dashboard", requireAuth, function (req, res) {
   res.sendFile(path.join(__dirname, "views", "dashboard.html"));
