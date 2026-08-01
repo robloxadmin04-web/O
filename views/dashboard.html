@@ -5,21 +5,476 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
   <link rel="stylesheet" href="/style.css" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-2: #121a30;
+      --panel: rgba(16, 24, 48, 0.88);
+      --panel-2: rgba(21, 31, 61, 0.92);
+      --border: rgba(120, 150, 255, 0.18);
+      --text: #eef2ff;
+      --muted: #9aa7d1;
+      --accent: #6ee7ff;
+      --accent-2: #7c3aed;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(110, 231, 255, 0.18), transparent 28%),
+        radial-gradient(circle at top right, rgba(124, 58, 237, 0.16), transparent 24%),
+        linear-gradient(180deg, #090d18 0%, #0e1426 100%);
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      width: min(1180px, calc(100% - 32px));
+      margin: 32px auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(10, 16, 33, 0.72);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand__logo {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #08101f;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: 0 12px 30px rgba(110, 231, 255, 0.22);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .brand p,
+    .muted {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.22);
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.45fr 0.95fr;
+      gap: 20px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .panel__body {
+      padding: 26px;
+    }
+
+    .panel__glow {
+      position: absolute;
+      inset: auto -40px -60px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(110, 231, 255, 0.18), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .headline {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      line-height: 1.08;
+    }
+
+    .lead {
+      margin: 16px 0 0;
+      max-width: 58ch;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    .hero__actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      cursor: wait;
+      opacity: 0.72;
+      transform: none;
+    }
+
+    .btn--primary {
+      color: #08101f;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      box-shadow: 0 14px 32px rgba(110, 231, 255, 0.18);
+    }
+
+    .btn--ghost {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn--danger {
+      color: #fff;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 14px 32px rgba(239, 68, 68, 0.2);
+    }
+
+    .mini-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .metric {
+      padding: 18px;
+      border-radius: 18px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .metric__label {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin: 0 0 8px;
+    }
+
+    .metric__value {
+      margin: 0;
+      font-size: 1.45rem;
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .section-title {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .list li {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .list strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .list span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .account-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .account-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .account-row:first-of-type {
+      padding-top: 0;
+    }
+
+    .account-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .account-value {
+      font-weight: 700;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #bbf7d0;
+      font-weight: 700;
+    }
+
+    .status-dot::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 18px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .dashboard {
+        width: min(100% - 20px, 1180px);
+        margin: 20px auto;
+      }
+
+      .topbar,
+      .panel__body {
+        padding: 18px;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .topbar__actions,
+      .hero__actions {
+        width: 100%;
+      }
+
+      .topbar__actions .pill,
+      .hero__actions .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main class="shell">
-    <section class="card">
-      <header class="card__head">
-        <div class="logo" aria-hidden="true">O</div>
-        <h1>You are signed in</h1>
-        <p class="sub" id="who">Loading your account...</p>
-      </header>
+  <main class="dashboard">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">O</div>
+        <div>
+          <h1>O Dashboard</h1>
+          <p>Minimal dark control panel</p>
+        </div>
+      </div>
 
-      <button type="button" class="btn" id="logoutBtn">Sign out</button>
+      <div class="topbar__actions">
+        <div class="pill">Session Active</div>
+      </div>
+    </header>
 
-      <footer class="card__foot">
-        <p>This page is only reachable with a valid session cookie.</p>
-      </footer>
+    <section class="hero">
+      <article class="panel">
+        <div class="panel__body">
+          <p class="eyebrow">Overview</p>
+          <h2 class="headline">Welcome back to your workspace.</h2>
+          <p class="lead" id="who">Loading your account...</p>
+
+          <div class="hero__actions">
+            <button type="button" class="btn btn--primary">Start Obfuscation</button>
+            <button type="button" class="btn btn--ghost">Open Settings</button>
+            <button type="button" class="btn btn--danger" id="logoutBtn">Sign out</button>
+          </div>
+        </div>
+        <div class="panel__glow" aria-hidden="true"></div>
+      </article>
+
+      <aside class="mini-grid">
+        <section class="panel">
+          <div class="panel__body">
+            <p class="metric__label">Project</p>
+            <p class="metric__value">O Protector</p>
+            <p class="footer-note">Your private Lua protection workspace is ready.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__body">
+            <p class="metric__label">Protection Status</p>
+            <p class="metric__value status-dot">Ready</p>
+            <p class="footer-note">Core UI is online and session check is active.</p>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panel__body">
+          <h3 class="section-title">Quick Actions</h3>
+          <ul class="list">
+            <li>
+              <strong>Upload script</strong>
+              <span>Add a Lua file and prepare it for your first protection pass.</span>
+            </li>
+            <li>
+              <strong>Configure presets</strong>
+              <span>Set your identifier mangling, string encoding, and guard layers.</span>
+            </li>
+            <li>
+              <strong>Export build</strong>
+              <span>Package the protected output for testing and release.</span>
+            </li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__body">
+          <h3 class="section-title">Account</h3>
+
+          <div class="account-row">
+            <span class="account-label">Signed in as</span>
+            <span class="account-value" id="accountEmail">Loading...</span>
+          </div>
+
+          <div class="account-row">
+            <span class="account-label">Access</span>
+            <span class="account-value">Private Session</span>
+          </div>
+
+          <div class="account-row">
+            <span class="account-label">Workspace</span>
+            <span class="account-value">Dark Minimal v1</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__body">
+          <h3 class="section-title">Recent Activity</h3>
+          <ul class="list">
+            <li>
+              <strong>Dashboard initialized</strong>
+              <span>The session-protected dashboard UI has been loaded successfully.</span>
+            </li>
+            <li>
+              <strong>API session check</strong>
+              <span>Your client validates the active cookie through the current auth endpoint.</span>
+            </li>
+            <li>
+              <strong>Next build target</strong>
+              <span>Connect this dashboard to real obfuscation actions once the backend routes are ready.</span>
+            </li>
+          </ul>
+        </div>
+      </article>
     </section>
   </main>
 
@@ -28,6 +483,7 @@
       "use strict";
 
       var who = document.getElementById("who");
+      var accountEmail = document.getElementById("accountEmail");
       var logoutBtn = document.getElementById("logoutBtn");
 
       fetch("/api/me", { credentials: "same-origin" })
@@ -38,7 +494,9 @@
           return res.json();
         })
         .then(function (data) {
-          who.textContent = "Signed in as " + data.email;
+          var email = data && data.email ? data.email : "Unknown user";
+          who.textContent = "Signed in as " + email + ". Your dashboard is ready.";
+          accountEmail.textContent = email;
         })
         .catch(function () {
           window.location.href = "/";
@@ -46,10 +504,14 @@
 
       logoutBtn.addEventListener("click", function () {
         logoutBtn.disabled = true;
-        fetch("/api/logout", { method: "POST", credentials: "same-origin" })
-          .then(function () {
-            window.location.href = "/";
-          });
+        logoutBtn.textContent = "Signing out...";
+
+        fetch("/api/logout", {
+          method: "POST",
+          credentials: "same-origin"
+        }).then(function () {
+          window.location.href = "/";
+        });
       });
     })();
   </script>
