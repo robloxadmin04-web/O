@@ -3,29 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>O Protector â€” Dashboard</title>
+  <title>Dashboard</title>
   <style>
     :root {
-      --bg: #0a0a0a;
-      --bg-2: #111111;
-      --panel: #141414;
-      --panel-2: #1a1a1a;
-      --border: #262626;
-      --border-2: #333333;
-      --text: #f5f5f5;
-      --muted: #a3a3a3;
-      --muted-2: #6b6b6b;
-      --accent: #ffffff;
-      --danger: #e5e5e5;
-      --radius: 16px;
-      --mono: "SF Mono", "JetBrains Mono", "Fira Code", Consolas, monospace;
+      --bg: #0a0a0a; --panel: #141414; --panel-2: #1a1a1a;
+      --border: #262626; --border-2: #333333;
+      --text: #f5f5f5; --muted: #a3a3a3; --muted-2: #6b6b6b;
+      --radius: 16px; --mono: "SF Mono","JetBrains Mono","Fira Code",Consolas,monospace;
     }
-
     * { box-sizing: border-box; }
-
     html, body {
-      margin: 0;
-      min-height: 100%;
+      margin: 0; min-height: 100%;
       font-family: Inter, -apple-system, "Segoe UI", Arial, sans-serif;
       color: var(--text);
       background:
@@ -33,80 +21,38 @@
         radial-gradient(circle at bottom right, rgba(255,255,255,0.03), transparent 30%),
         linear-gradient(180deg, #060606 0%, #0d0d0d 100%);
     }
-
     body { min-height: 100vh; }
+    .dashboard { width: min(1180px, calc(100% - 32px)); margin: 32px auto; display: grid; gap: 20px; }
 
-    .dashboard {
-      width: min(1180px, calc(100% - 32px));
-      margin: 32px auto;
-      display: grid;
-      gap: 20px;
-    }
-
-    /* Topbar */
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px 22px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: rgba(20,20,20,0.7);
-      backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 18px 22px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: rgba(20,20,20,0.7); backdrop-filter: blur(12px);
     }
-
     .brand { display: flex; align-items: center; gap: 14px; }
-
     .brand__logo {
-      width: 46px; height: 46px;
-      display: grid; place-items: center;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #ffffff, #a3a3a3);
-      color: #0a0a0a;
-      font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em;
-      border: 1px solid #444;
+      width: 46px; height: 46px; display: grid; place-items: center; border-radius: 12px;
+      background: linear-gradient(135deg, #ffffff, #a3a3a3); color: #0a0a0a;
+      font-size: 1.25rem; font-weight: 800; letter-spacing: 0.08em; border: 1px solid #444;
     }
-
     .brand h1 { margin: 0; font-size: 1.05rem; font-weight: 700; }
-    .brand p, .muted {
-      margin: 4px 0 0; color: var(--muted); font-size: 0.94rem;
-    }
-
+    .brand p { margin: 4px 0 0; color: var(--muted); font-size: 0.94rem; }
     .topbar__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
     .pill {
-      padding: 9px 14px; border-radius: 999px;
-      border: 1px solid var(--border-2);
+      padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border-2);
       background: #1c1c1c; color: var(--muted); font-size: 0.88rem; font-weight: 600;
       display: inline-flex; align-items: center; gap: 8px;
     }
-    .pill::before {
-      content: ""; width: 8px; height: 8px; border-radius: 50%;
-      background: #e5e5e5; box-shadow: 0 0 0 4px rgba(229,229,229,0.12);
-    }
+    .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e5e5e5; box-shadow: 0 0 0 4px rgba(229,229,229,0.12); }
 
-    /* Panels */
-    .panel {
-      position: relative; overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--panel);
-    }
+    .panel { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
     .panel__body { padding: 24px; }
-
-    .eyebrow {
-      margin: 0 0 12px; color: var(--muted-2);
-      text-transform: uppercase; letter-spacing: 0.16em;
-      font-size: 0.7rem; font-weight: 700;
-    }
+    .eyebrow { margin: 0 0 12px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.7rem; font-weight: 700; }
     .headline { margin: 0; font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.1; }
     .lead { margin: 14px 0 0; max-width: 60ch; color: var(--muted); line-height: 1.7; font-size: 0.98rem; }
 
-    /* Buttons */
     .btn {
-      appearance: none; border: 1px solid var(--border-2);
-      border-radius: 12px; padding: 12px 18px;
+      appearance: none; border: 1px solid var(--border-2); border-radius: 12px; padding: 12px 18px;
       font: inherit; font-weight: 700; cursor: pointer;
       transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s ease;
     }
@@ -118,78 +64,62 @@
     .btn--ghost:hover { background: #232323; border-color: #444; }
     .btn--danger { color: #f5f5f5; background: #1c1c1c; border-color: #3a1f1f; }
     .btn--danger:hover { background: #2a1414; border-color: #5a2a2a; }
-
     .hero__actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
 
-    /* Layout */
     .hero { display: grid; grid-template-columns: 1.45fr 0.95fr; gap: 20px; }
     .mini-grid { display: grid; gap: 14px; }
-
-    .metric { }
     .metric__label { color: var(--muted-2); font-size: 0.82rem; margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
     .metric__value { margin: 0; font-size: 1.4rem; font-weight: 800; }
     .footer-note { color: var(--muted); font-size: 0.88rem; margin-top: 10px; line-height: 1.6; }
 
-    /* Obfuscator studio */
     .studio { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .studio__col { display: flex; flex-direction: column; }
-
-    .section-title {
-      margin: 0 0 4px; font-size: 1.02rem; font-weight: 700;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
+    .section-title { margin: 0 0 4px; font-size: 1.02rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .section-sub { margin: 0 0 16px; color: var(--muted); font-size: 0.88rem; }
 
     textarea {
-      width: 100%; min-height: 320px; resize: vertical;
-      background: #0d0d0d; color: #e5e5e5;
-      border: 1px solid var(--border-2); border-radius: 12px;
-      padding: 14px; font-family: var(--mono); font-size: 0.86rem; line-height: 1.55;
-      tab-size: 2;
+      width: 100%; min-height: 320px; resize: vertical; background: #0d0d0d; color: #e5e5e5;
+      border: 1px solid var(--border-2); border-radius: 12px; padding: 14px;
+      font-family: var(--mono); font-size: 0.86rem; line-height: 1.55; tab-size: 2;
     }
     textarea:focus { outline: none; border-color: #555; }
     textarea[readonly] { background: #0b0b0b; color: #cfcfcf; }
-
     .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 
-    .options {
-      display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px; margin: 14px 0 4px;
-    }
+    .options { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin: 14px 0 4px; }
     .opt {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 13px; border: 1px solid var(--border); border-radius: 10px;
-      background: #131313; cursor: pointer; font-size: 0.88rem; user-select: none;
+      display: flex; align-items: center; gap: 10px; padding: 11px 13px;
+      border: 1px solid var(--border); border-radius: 10px; background: #131313;
+      cursor: pointer; font-size: 0.88rem; user-select: none;
     }
     .opt:hover { border-color: var(--border-2); }
     .opt input { accent-color: #f5f5f5; width: 15px; height: 15px; cursor: pointer; }
 
-    .status-line {
-      margin-top: 12px; font-family: var(--mono); font-size: 0.8rem;
-      color: var(--muted); min-height: 1.2em;
-    }
+    .status-line { margin-top: 12px; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); min-height: 1.2em; }
     .status-line.ok { color: #d4d4d4; }
     .status-line.err { color: #f0a0a0; }
 
-    /* Grid cards */
+    .keybox {
+      margin-top: 12px; padding: 12px 14px; border: 1px solid var(--border-2); border-radius: 10px;
+      background: #0d0d0d; font-family: var(--mono); font-size: 0.82rem; color: #d4d4d4;
+      word-break: break-all; display: none;
+    }
+    .keybox.show { display: block; }
+    .keybox b { color: #fff; }
+
     .grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
     .list { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
     .list li { padding: 13px 15px; border-radius: 12px; background: #131313; border: 1px solid var(--border); }
     .list strong { display: block; margin-bottom: 6px; font-size: 0.94rem; }
     .list span { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
 
-    .account-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 13px 0; border-bottom: 1px solid var(--border);
-    }
+    .account-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); }
     .account-row:last-child { border-bottom: 0; padding-bottom: 0; }
     .account-row:first-of-type { padding-top: 0; }
     .account-label { color: var(--muted); font-size: 0.9rem; }
     .account-value { font-weight: 700; text-align: right; word-break: break-word; }
 
-    @media (max-width: 980px) {
-      .hero, .grid, .studio { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 980px) { .hero, .grid, .studio { grid-template-columns: 1fr; } }
     @media (max-width: 640px) {
       .dashboard { width: min(100% - 20px, 1180px); margin: 20px auto; }
       .topbar, .panel__body { padding: 18px; }
@@ -204,21 +134,16 @@
     <header class="topbar">
       <div class="brand">
         <div class="brand__logo" aria-hidden="true">O</div>
-        <div>
-          <h1>O Protector</h1>
-          <p>Monochrome Lua obfuscation workspace</p>
-        </div>
+        <div><h1>O Protector</h1><p>Server-side Lua obfuscation</p></div>
       </div>
-      <div class="topbar__actions">
-        <div class="pill">Session Active</div>
-      </div>
+      <div class="topbar__actions"><div class="pill">Session Active</div></div>
     </header>
 
     <section class="hero">
       <article class="panel">
         <div class="panel__body">
           <p class="eyebrow">Overview</p>
-          <h2 class="headline">Protect your Lua, in one pass.</h2>
+          <h2 class="headline">Protect your Lua on the server.</h2>
           <p class="lead" id="who">Loading your account...</p>
           <div class="hero__actions">
             <button type="button" class="btn btn--primary" id="jumpBtn">Start Obfuscation</button>
@@ -227,111 +152,94 @@
           </div>
         </div>
       </article>
-
       <aside class="mini-grid">
-        <section class="panel">
-          <div class="panel__body metric">
-            <p class="metric__label">Project</p>
-            <p class="metric__value">O Protector</p>
-            <p class="footer-note">LuaRaptor-style source protection, running locally.</p>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel__body metric">
-            <p class="metric__label">Engine</p>
-            <p class="metric__value" id="engineStatus">Checking...</p>
-            <p class="footer-note">Rename Â· encode Â· mangle Â· junk Â· minify.</p>
-          </div>
-        </section>
+        <section class="panel"><div class="panel__body">
+          <p class="metric__label">Project</p><p class="metric__value">O Protector</p>
+          <p class="footer-note">Engine runs on the server â€” never exposed to clients.</p>
+        </div></section>
+        <section class="panel"><div class="panel__body">
+          <p class="metric__label">Mode</p><p class="metric__value">Server-side</p>
+          <p class="footer-note">Rename Â· encrypt Â· mangle Â· guard Â· key-lock.</p>
+        </div></section>
       </aside>
     </section>
 
-    <!-- OBFUSCATOR STUDIO -->
-    <section class="panel" id="studio">
-      <div class="panel__body">
-        <div class="studio">
-          <div class="studio__col">
-            <h3 class="section-title">Input Script</h3>
-            <p class="section-sub">Paste your Lua source below.</p>
-            <textarea id="inputCode" spellcheck="false" placeholder="-- paste your Lua code here&#10;local greeting = &quot;Hello, world&quot;&#10;print(greeting)"></textarea>
+    <section class="panel" id="studio"><div class="panel__body">
+      <div class="studio">
+        <div class="studio__col">
+          <h3 class="section-title">Input Script</h3>
+          <p class="section-sub">Paste your Lua source. It is protected on the server.</p>
+          <textarea id="inputCode" spellcheck="false" placeholder="-- paste your Lua code here&#10;local greeting = &quot;Hello, world&quot;&#10;print(greeting)"></textarea>
 
-            <div class="options" id="options">
-              <label class="opt"><input type="checkbox" id="optRename" checked /> Rename locals</label>
-              <label class="opt"><input type="checkbox" id="optStrings" checked /> Encode strings</label>
-              <label class="opt"><input type="checkbox" id="optNumbers" checked /> Mangle numbers</label>
-              <label class="opt"><input type="checkbox" id="optJunk" checked /> Inject junk code</label>
-              <label class="opt"><input type="checkbox" id="optMinify" checked /> Minify output</label>
-              <label class="opt"><input type="checkbox" id="optWatermark" checked /> Watermark header</label>
-            </div>
-
-            <div class="toolbar">
-              <button type="button" class="btn btn--primary" id="runBtn">Obfuscate</button>
-              <button type="button" class="btn btn--ghost" id="clearBtn">Clear</button>
-              <button type="button" class="btn btn--ghost" id="sampleBtn">Load sample</button>
-            </div>
-            <div class="status-line" id="status"></div>
+          <div class="options" id="options">
+            <label class="opt"><input type="checkbox" id="optRename" checked /> Rename locals</label>
+            <label class="opt"><input type="checkbox" id="optStrings" checked /> Encrypt strings</label>
+            <label class="opt"><input type="checkbox" id="optNumbers" checked /> Mangle numbers</label>
+            <label class="opt"><input type="checkbox" id="optJunk" checked /> Inject junk code</label>
+            <label class="opt"><input type="checkbox" id="optTamper" checked /> Anti-tamper guard</label>
+            <label class="opt"><input type="checkbox" id="optMinify" checked /> Minify output</label>
+            <label class="opt"><input type="checkbox" id="optLock" /> Lock with runtime key</label>
+            <label class="opt"><input type="checkbox" id="optWatermark" checked /> Watermark header</label>
           </div>
 
-          <div class="studio__col">
-            <h3 class="section-title">Protected Output</h3>
-            <p class="section-sub">Copy or download the result.</p>
-            <textarea id="outputCode" spellcheck="false" readonly placeholder="-- your protected script appears here"></textarea>
-            <div class="toolbar">
-              <button type="button" class="btn btn--ghost" id="copyBtn">Copy</button>
-              <button type="button" class="btn btn--ghost" id="downloadBtn">Download .lua</button>
-            </div>
-            <div class="status-line" id="outStatus"></div>
+          <div class="toolbar">
+            <button type="button" class="btn btn--primary" id="runBtn">Obfuscate</button>
+            <button type="button" class="btn btn--ghost" id="clearBtn">Clear</button>
+            <button type="button" class="btn btn--ghost" id="sampleBtn">Load sample</button>
           </div>
+          <div class="status-line" id="status"></div>
+        </div>
+
+        <div class="studio__col">
+          <h3 class="section-title">Protected Output</h3>
+          <p class="section-sub">Copy or download the result.</p>
+          <textarea id="outputCode" spellcheck="false" readonly placeholder="-- your protected script appears here"></textarea>
+          <div class="keybox" id="keybox"><b>Runtime key:</b> <span id="keyval"></span></div>
+          <div class="toolbar">
+            <button type="button" class="btn btn--ghost" id="copyBtn">Copy</button>
+            <button type="button" class="btn btn--ghost" id="downloadBtn">Download .lua</button>
+          </div>
+          <div class="status-line" id="outStatus"></div>
         </div>
       </div>
-    </section>
+    </div></section>
 
     <section class="grid">
-      <article class="panel">
-        <div class="panel__body">
-          <h3 class="section-title">How it works</h3>
-          <ul class="list">
-            <li><strong>Rename locals</strong><span>Local variables become opaque identifiers.</span></li>
-            <li><strong>Encode strings</strong><span>Literals become XOR byte-arrays decoded at runtime.</span></li>
-            <li><strong>Guard &amp; junk</strong><span>Integrity guard plus dead code raise the reading bar.</span></li>
-          </ul>
-        </div>
-      </article>
+      <article class="panel"><div class="panel__body">
+        <h3 class="section-title">How it works</h3>
+        <ul class="list">
+          <li><strong>Server engine</strong><span>Obfuscation runs on the backend; clients never see it.</span></li>
+          <li><strong>Encrypted strings</strong><span>Literals become rotating-key byte arrays.</span></li>
+          <li><strong>Runtime key lock</strong><span>Optional per-build key checked against the server before running.</span></li>
+        </ul>
+      </div></article>
 
-      <article class="panel">
-        <div class="panel__body">
-          <h3 class="section-title">Account</h3>
-          <div class="account-row"><span class="account-label">Signed in as</span><span class="account-value" id="accountEmail">Loading...</span></div>
-          <div class="account-row"><span class="account-label">Access</span><span class="account-value">Private Session</span></div>
-          <div class="account-row"><span class="account-label">Workspace</span><span class="account-value">Monochrome v1</span></div>
-        </div>
-      </article>
+      <article class="panel"><div class="panel__body">
+        <h3 class="section-title">Account</h3>
+        <div class="account-row"><span class="account-label">Signed in as</span><span class="account-value" id="accountEmail">Loading...</span></div>
+        <div class="account-row"><span class="account-label">Access</span><span class="account-value">Private Session</span></div>
+        <div class="account-row"><span class="account-label">Workspace</span><span class="account-value">Monochrome v2</span></div>
+      </div></article>
 
-      <article class="panel">
-        <div class="panel__body">
-          <h3 class="section-title">Recent Activity</h3>
-          <ul class="list" id="activity">
-            <li><strong>Dashboard initialized</strong><span>The obfuscation studio loaded successfully.</span></li>
-            <li><strong>Engine ready</strong><span>The local protection engine is available.</span></li>
-            <li><strong>Awaiting input</strong><span>Paste a script and run your first pass.</span></li>
-          </ul>
-        </div>
-      </article>
+      <article class="panel"><div class="panel__body">
+        <h3 class="section-title">Recent Activity</h3>
+        <ul class="list" id="activity">
+          <li><strong>Dashboard initialized</strong><span>The obfuscation studio loaded successfully.</span></li>
+          <li><strong>Server engine ready</strong><span>Protection runs through the backend endpoint.</span></li>
+          <li><strong>Awaiting input</strong><span>Paste a script and run your first pass.</span></li>
+        </ul>
+      </div></article>
     </section>
   </main>
 
-  <script src="/obfuscator.js"></script>
   <script>
     (function () {
       "use strict";
-
       var who = document.getElementById("who");
       var accountEmail = document.getElementById("accountEmail");
       var logoutBtn = document.getElementById("logoutBtn");
-      var engineStatus = document.getElementById("engineStatus");
       var activity = document.getElementById("activity");
 
-      // --- Session ---
       fetch("/api/me", { credentials: "same-origin" })
         .then(function (res) { if (!res.ok) throw new Error("no session"); return res.json(); })
         .then(function (data) {
@@ -342,35 +250,20 @@
         .catch(function () { window.location.href = "/"; });
 
       logoutBtn.addEventListener("click", function () {
-        logoutBtn.disabled = true;
-        logoutBtn.textContent = "Signing out...";
+        logoutBtn.disabled = true; logoutBtn.textContent = "Signing out...";
         fetch("/api/logout", { method: "POST", credentials: "same-origin" })
           .then(function () { window.location.href = "/"; });
       });
 
-      // --- Engine check ---
-      var engineReady = !!(window.OObfuscator && typeof window.OObfuscator.obfuscate === "function");
-      engineStatus.textContent = engineReady ? "Ready" : "Unavailable";
-
-      // --- Elements ---
       var inputCode = document.getElementById("inputCode");
       var outputCode = document.getElementById("outputCode");
       var statusEl = document.getElementById("status");
       var outStatus = document.getElementById("outStatus");
-
+      var keybox = document.getElementById("keybox");
+      var keyval = document.getElementById("keyval");
       var runBtn = document.getElementById("runBtn");
-      var clearBtn = document.getElementById("clearBtn");
-      var sampleBtn = document.getElementById("sampleBtn");
-      var copyBtn = document.getElementById("copyBtn");
-      var downloadBtn = document.getElementById("downloadBtn");
-      var jumpBtn = document.getElementById("jumpBtn");
-      var settingsBtn = document.getElementById("settingsBtn");
-      var optionsBox = document.getElementById("options");
 
-      function setStatus(el, msg, kind) {
-        el.textContent = msg;
-        el.className = "status-line" + (kind ? " " + kind : "");
-      }
+      function setStatus(el, msg, kind) { el.textContent = msg; el.className = "status-line" + (kind ? " " + kind : ""); }
 
       function readOptions() {
         return {
@@ -378,9 +271,9 @@
           encodeStrings: document.getElementById("optStrings").checked,
           mangleNumbers: document.getElementById("optNumbers").checked,
           injectJunk: document.getElementById("optJunk").checked,
+          antiTamper: document.getElementById("optTamper").checked,
           minify: document.getElementById("optMinify").checked,
-          watermark: document.getElementById("optWatermark").checked
-            ? "Protected by O Protector" : ""
+          watermark: document.getElementById("optWatermark").checked ? "Protected by O Protector" : ""
         };
       }
 
@@ -399,74 +292,80 @@
         'print("Total characters: " .. total)'
       ].join("\n");
 
-      // --- Run obfuscation ---
       runBtn.addEventListener("click", function () {
-        if (!engineReady) { setStatus(statusEl, "Engine unavailable â€” reload the page.", "err"); return; }
         var src = inputCode.value;
         if (!src.trim()) { setStatus(statusEl, "Paste some Lua code first.", "err"); return; }
-
         runBtn.disabled = true;
-        setStatus(statusEl, "Obfuscating...", "");
+        setStatus(statusEl, "Obfuscating on server...", "");
+        keybox.className = "keybox";
 
-        setTimeout(function () {
-          try {
-            var t0 = performance.now();
-            var result = window.OObfuscator.obfuscate(src, readOptions());
-            var ms = Math.round(performance.now() - t0);
-            outputCode.value = result;
-            var ratio = src.length ? Math.round((result.length / src.length) * 100) : 0;
-            setStatus(statusEl, "Done in " + ms + "ms â€” " + src.length + " -> " + result.length + " chars (" + ratio + "%).", "ok");
-            setStatus(outStatus, "Ready to copy or download.", "ok");
-            pushActivity("Obfuscation complete", result.length + " characters produced in " + ms + "ms.");
-          } catch (e) {
-            setStatus(statusEl, "Error: " + e.message, "err");
-          } finally {
-            runBtn.disabled = false;
-          }
-        }, 20);
+        fetch("/api/obfuscate", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source: src,
+            options: readOptions(),
+            lockKey: document.getElementById("optLock").checked
+          })
+        })
+          .then(function (res) {
+            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+          })
+          .then(function (r) {
+            if (!r.ok) { throw new Error((r.data && r.data.error) || "Request failed."); }
+            outputCode.value = r.data.output;
+            var ratio = src.length ? Math.round((r.data.chars / src.length) * 100) : 0;
+            setStatus(statusEl, "Done â€” " + src.length + " -> " + r.data.chars + " chars (" + ratio + "%).", "ok");
+            if (r.data.key) {
+              keyval.textContent = r.data.key;
+              keybox.className = "keybox show";
+              setStatus(outStatus, "Key-locked build. Keep this key â€” the script checks it at runtime.", "ok");
+            } else {
+              setStatus(outStatus, "Ready to copy or download.", "ok");
+            }
+            pushActivity("Obfuscation complete", r.data.chars + " characters produced" + (r.data.key ? " (key-locked)." : "."));
+          })
+          .catch(function (e) { setStatus(statusEl, "Error: " + e.message, "err"); })
+          .then(function () { runBtn.disabled = false; });
       });
 
-      clearBtn.addEventListener("click", function () {
+      document.getElementById("clearBtn").addEventListener("click", function () {
         inputCode.value = ""; outputCode.value = "";
+        keybox.className = "keybox";
         setStatus(statusEl, "Cleared.", ""); setStatus(outStatus, "", "");
         inputCode.focus();
       });
 
-      sampleBtn.addEventListener("click", function () {
-        inputCode.value = SAMPLE;
-        setStatus(statusEl, "Sample loaded â€” hit Obfuscate.", "");
-        inputCode.focus();
+      document.getElementById("sampleBtn").addEventListener("click", function () {
+        inputCode.value = SAMPLE; setStatus(statusEl, "Sample loaded â€” hit Obfuscate.", ""); inputCode.focus();
       });
 
-      copyBtn.addEventListener("click", function () {
+      document.getElementById("copyBtn").addEventListener("click", function () {
         if (!outputCode.value) { setStatus(outStatus, "Nothing to copy yet.", "err"); return; }
         outputCode.select();
         var done = function () { setStatus(outStatus, "Copied to clipboard.", "ok"); };
         if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(outputCode.value).then(done, function () {
-            document.execCommand("copy"); done();
-          });
+          navigator.clipboard.writeText(outputCode.value).then(done, function () { document.execCommand("copy"); done(); });
         } else { document.execCommand("copy"); done(); }
       });
 
-      downloadBtn.addEventListener("click", function () {
+      document.getElementById("downloadBtn").addEventListener("click", function () {
         if (!outputCode.value) { setStatus(outStatus, "Nothing to download yet.", "err"); return; }
         var blob = new Blob([outputCode.value], { type: "text/plain" });
         var url = URL.createObjectURL(blob);
         var a = document.createElement("a");
         a.href = url; a.download = "protected.lua";
-        document.body.appendChild(a); a.click();
-        document.body.removeChild(a); URL.revokeObjectURL(url);
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         setStatus(outStatus, "Downloaded protected.lua", "ok");
       });
 
-      jumpBtn.addEventListener("click", function () {
+      document.getElementById("jumpBtn").addEventListener("click", function () {
         document.getElementById("studio").scrollIntoView({ behavior: "smooth", block: "start" });
         inputCode.focus();
       });
-
-      settingsBtn.addEventListener("click", function () {
-        optionsBox.scrollIntoView({ behavior: "smooth", block: "center" });
+      document.getElementById("settingsBtn").addEventListener("click", function () {
+        document.getElementById("options").scrollIntoView({ behavior: "smooth", block: "center" });
       });
 
       function pushActivity(title, detail) {
