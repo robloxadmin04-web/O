@@ -223,7 +223,8 @@ app.post("/api/obfuscate", requireAuth, function (req, res) {
   }
 
   const raw = (req.body && req.body.options) || {};
-  const mode = (req.body && req.body.mode) === "wrap" ? "wrap" : "obfuscate";
+  const rawMode = req.body && req.body.mode;
+  const mode = rawMode === "vm" ? "vm" : rawMode === "wrap" ? "wrap" : "obfuscate";
   const options = {
     renameLocals: raw.renameLocals !== false,
     encodeStrings: raw.encodeStrings !== false,
@@ -246,7 +247,9 @@ app.post("/api/obfuscate", requireAuth, function (req, res) {
   try {
     // "wrap" = encrypted-loader protection (works on complex exploit scripts).
     // "obfuscate" = source-level rename/encrypt/mangle (readable structure gone).
-    const output = mode === "wrap"
+    const output = mode === "vm"
+      ? engine.wrapVM(source, options)
+      : mode === "wrap"
       ? engine.wrap(source, options)
       : engine.obfuscate(source, options);
     res.json({ ok: true, output: output, key: key, chars: output.length });
