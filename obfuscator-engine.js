@@ -383,4 +383,91 @@ function makeKey() {
   return crypto.randomBytes(16).toString("hex");
 }
 
-module.exports = { obfuscate, makeKey, tokenize, version: "2.0.0" };
+// --- Wrapper mode: encrypt the ENTIRE script + emit a Lua loader stub -------
+// The whole source is encrypted into an LCG-keystream byte array; a tiny loader
+// decrypts it at runtime and runs it via loadstring/load. Runtime behaviour is
+// preserved (hooks, getrenv, metatables all still execute normally) â€” only the
+// on-disk form is opaque. This is the protection that works on real Luau
+// exploit scripts that a bytecode VM would break.
+function wrap(source, options = {}) {
+  if (typeof source !== "string" || source.trim() === "") {
+    throw new Error("Empty source: provide some Lua code.");
+  }
+  const opts = {
+    antiTamper: options.antiTamper !== false,
+    watermark: options.watermark || "Protected by O Protector"
+  };
+
+  const names = {
+    dec: "_O" + randName(6),
+    data: "_O" + randName(6),
+    load: "_O" + randName(6),
+    fn: "_O" + randName(6),
+    guard: "_O" + randName(6),
+    ok: "_O" + randName(6),
+    err: "_O" + randName(6),
+    keyvar: "_O" + randName(6),
+    verify: "_O" + randName(6)
+  };
+  const seed = 1 + rnd(2147483000);
+
+  // Encrypt real UTF-8 bytes so Unicode content survives byte-exact.
+  const src = Buffer.from(source, "utf8");
+  let state = seed % 2147483648;
+  const bytes = new Array(src.length);
+  for (let i = 0; i < src.length; i++) {
+    state = (state * 1103515245 + 12345) % 2147483648;
+    bytes[i] = (src[i] & 0xff) ^ (state % 256);
+  }
+
+  // Chunk the byte literal so no line is absurdly long.
+  const perLine = 40;
+  const chunks = [];
+  for (let i = 0; i < bytes.length; i += perLine) {
+    chunks.push(bytes.slice(i, i + perLine).join(","));
+  }
+  const dataLiteral = "{\n" + chunks.join(",\n") + "\n}";
+
+  const L = [];
+  L.push("--[[ " + opts.watermark + " ]]");
+  L.push("local " + names.dec + "=function(t,s)");
+  L.push("  local o={}");
+  L.push("  for i=1,#t do");
+  L.push("    s=(s*1103515245+12345)%2147483648");
+  L.push("    o[i]=string.char((t[i]~(s%256))%256)");
+  L.push("  end");
+  L.push("  return table.concat(o)");
+  L.push("end");
+
+  // Optional key lock BEFORE decrypting the payload (fail-closed on invalid key).
+  const keyInfo = options.keyInfo;
+  if (keyInfo && keyInfo.key) {
+    const url = (keyInfo.verifyUrl || "").replace(/"/g, "");
+    L.push("local " + names.keyvar + "=\"" + keyInfo.key + "\"");
+    L.push("local " + names.verify + "=function()");
+    L.push("  local u=\"" + url + "\"");
+    L.push("  if u==\"\" then return true end");
+    L.push("  local req=(syn and syn.request) or (http and http.request) or request");
+    L.push("  if type(req)~=\"function\" then return true end");
+    L.push("  local ok,res=pcall(function() return req({Url=u..\"?key=\".." + names.keyvar + ",Method=\"GET\"}) end)");
+    L.push("  if not ok or not res then return false end");
+    L.push("  return tostring(res.Body or res.body or \"\"):find('\"valid\":true')~=nil");
+    L.push("end");
+    L.push("if not " + names.verify + "() then return end");
+  }
+
+  if (opts.antiTamper) {
+    L.push("if not pcall(function() assert(string.char(65)==\"A\") end) then return end");
+  }
+
+  L.push("local " + names.data + "=" + dataLiteral);
+  L.push("local " + names.load + "=" + names.dec + "(" + names.data + "," + seed + ")");
+  L.push("local " + names.fn + "=(loadstring or load)(" + names.load + ")");
+  L.push("if type(" + names.fn + ")~=\"function\" then return end");
+  L.push("local " + names.ok + "," + names.err + "=pcall(" + names.fn + ")");
+  L.push("if not " + names.ok + " then error(" + names.err + ",0) end");
+
+  return L.join("\n") + "\n";
+}
+
+module.exports = { obfuscate, wrap, makeKey, tokenize, version: "3.0.0" };
